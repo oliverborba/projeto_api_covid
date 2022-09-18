@@ -114,8 +114,8 @@ for obs in final_data[1::30]:
 
 chart = create_chart(x, [y_data_1, y_data_2], labels, title='Gráfico confirmados vs recuperados')
 chart_content = get_api_chart(chart)
-save_image('meu-primeiro-grafico.png', chart_content)
-display_image('meu-primeiro-grafico.png')
+save_image('meu-primeiro-graf.png', chart_content)
+display_image('meu-primeiro-graf.png')
 
 def get_api_qrcode(link):
     text = quote(link) #parsing do link para url

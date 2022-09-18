@@ -3,21 +3,21 @@ import datetime as dt
 import csv
 from PIL import Image
 from IPython.display import display
+from urllib.parse import quote
 
 url = 'https://api.covid19api.com/dayone/country/brazil'
 
 resp = r.get(url)
 
-print(resp.status_code)
+"""print(resp.status_code)"""
 raw_data = resp.json()
-print(raw_data[0])
+"""print(raw_data[0])"""
 
 final_data = []
 for obs in raw_data:
     final_data.append([obs['Confirmed'], obs['Deaths'], obs['Recovered'], obs['Active'], obs['Date']])
 
 final_data.insert(0, ['confirmados', 'obitos', 'recuperados', 'ativos', 'data'])
-print(final_data)
 
 CONFIRMADOS = 0
 OBITOS = 1
@@ -27,7 +27,7 @@ DATA = 4
 
 for i in range(1, len(final_data)):
     final_data[i][DATA] = final_data[i][DATA][:10]
-print(final_data)
+"""print(final_data)"""
 
 with open('br-covid-19.csv', 'w') as file:
     writer = csv.writer(file)
@@ -35,7 +35,7 @@ with open('br-covid-19.csv', 'w') as file:
 
 for i in range(1, len(final_data)):
     final_data[i][DATA] = dt.datetime.strptime(final_data[i][DATA], '%Y-%m-%d')
-print(final_data)
+"""print(final_data)"""
 
 
 def get_datasets(y, labels):
@@ -99,20 +99,31 @@ def display_image(path):
 
 
 y_data_1 = []
-for obs in final_data[1::10]:
+for obs in final_data[1::30]:
     y_data_1.append(obs[CONFIRMADOS])
 
 y_data_2 = []
-for obs in final_data[1::10]:
-    y_data_1.append(obs[CONFIRMADOS])
+for obs in final_data[1::30]:
+    y_data_2.append(obs[RECUPERADOS])
 
 labels = ['Confirmados', 'Recuperados']
 
 x = []
-for obs in final_data[1::10]:
+for obs in final_data[1::30]:
     x.append(obs[DATA].strftime('%d/%m/%Y'))
 
 chart = create_chart(x, [y_data_1, y_data_2], labels, title='Gráfico confirmados vs recuperados')
 chart_content = get_api_chart(chart)
 save_image('meu-primeiro-grafico.png', chart_content)
 display_image('meu-primeiro-grafico.png')
+
+def get_api_qrcode(link):
+    text = quote(link) #parsing do link para url
+    url_base = 'https://quickchart.io/qr'
+    resp = r.get(f'{url_base}?text={text}')
+    return resp.content
+
+url_base = 'https://quickchart.io/chart'
+link = f'{url_base}?c={str(chart)}'
+save_image('qr-code.png', get_api_qrcode(link))
+display_image('qr-code.png')
